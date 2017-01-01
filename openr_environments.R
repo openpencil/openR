@@ -1,5 +1,5 @@
 #### Objective: Understand R Environments ####
-
+#### a.k.a. totally unecessary but fascinating R plumbing ####
 
 #' Create an environment
 createdenvironment = new.env()
@@ -68,14 +68,55 @@ newEnvironment = new.env()
 parent.env(env = newEnvironment) <- createdenvironment
 parent.env(createdenvironment)
 
-# Here's another way to understand the "current" or "local" environment
-# We create a function that calls environment() to query for the local environment.
-# When R executes a function it automatically creates a new environment for that function.
-# This is useful - variables/objects created inside the function will live in the new local environment.
-# We call Test() to verify this.  We can see that Test() does NOT print R_GlobalEnv.
-# We didn't created any objects within Test().  If we had, they would live in the "0x0000000006ce9b58"
-# environment while Test() is running.  When the function completes executing, the environment dies.
+#' Functions inherit the environment in which they were created
+#' You can also change the environment in which the function will run using the environment() function
+#' Functions create their own environment to run the code within them. When the function completes
+#' executing, the environment that it creates dies. This is called the "Scope" of the function.
+#' However when a function is run within a function, it can come with its own environment specification.
+#' So a function always runs in the default environment in which it is created or the environment that is
+#' specified as an attribute of the function.
+#'
+#' Every package's function is created and run in the package's namespace environment by default.
+#' For example, when R looks for the function ggplot(), if ggplot() is not stuffed into the package's
+#' import environment, R will look in the packages environment, find ggplot in package:ggplot2 and
+#' execute the ggplot function within namespace:ggplot2.
+#' If a package has a function somefunction(), since all functions of package are run in the
+#' namespace environment of the package, R will look for somefunction() in the namespace environment,
+#' If the function is not found in the namespace environment of the package, R will look in the imports
+#' environment, and then namespace environment of R base packages, followed by the R_Global environment
+#' and finally the packages environment and finally the namespace of each of the packages loaded in the
+#' running instance of R. It will run the function in the environment it finds the function. That is why it
+#' is crucial to have your functions in the environment that has everything that your functions need
+#' to run successfully and in the expected manner. (You can do this by including important dependencies
+#' in the import environment)
+#'
+#' All this scoping can be skipped by using the :: operator. :: only fetches the EXPORTED functions from the package.
+`::`
+# function (pkg, name)
+# {
+#   pkg <- as.character(substitute(pkg))
+#   name <- as.character(substitute(name))
+#   getExportedValue(pkg, name)
+# }
+# <bytecode: 0x101c9b780>
+#   <environment: namespace:base>
+#' If the function is not exported, using ::: operator searches for the function in the namespace environment.
+`:::`
+# function (pkg, name)
+# {
+#   pkg <- as.character(substitute(pkg))
+#   name <- as.character(substitute(name))
+#   get(name, envir = asNamespace(pkg), inherits = FALSE)
+# }
+# <bytecode: 0x105b26470>
+#   <environment: namespace:base>
+#'
+#'
+#'
+#'
 test <-  function() {
   print(parent.env(environment()))
   }
 test()
+
+#
