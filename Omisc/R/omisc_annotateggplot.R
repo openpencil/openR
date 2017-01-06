@@ -5,6 +5,7 @@ calculate_median <- function(x, round_to = 4){
   #' calculate_median
   #'
   #' A function to annotate the graph with the median value of the observations.
+  #'
   #' @param x a vector of numeric values
   #' @param round_to the number of decimal places to which the median needs to be rounded. Default is 4.
   #' @keywords median, summary statistics, graph annotations
@@ -31,6 +32,7 @@ calculate_n <- function(x){
   #'
   #' A function to annotate the graph with the number of samples
   #' @param x a vector of numeric values
+  #' @
   #' @keywords sample size, graph annotations
   #' @export
   #' @examples
