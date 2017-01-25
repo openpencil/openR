@@ -1,5 +1,15 @@
 #### Objective: Learn some new functions! ####
-
+##
+## All functions in this script
+##
+## (subset(getParseData(parse('~/repos/openR/openr_vocabulary.R')),
+## token == "SYMBOL_FUNCTION_CALL")["text"] %>% unique)$text %>% sort
+##
+## c("binomial", "c", "capture.output", "cat", "data.frame", "ftable",
+## "glm", "list", "rbinom", "read.fwf", "readLines", "sink", "str",
+## "summary", "table", "tempfile", "unlink", "xtabs")
+##
+##
 ##### Concept I. Flatten a contingency table ####
 #'
 #' When would you want to do this: You have more than 2
