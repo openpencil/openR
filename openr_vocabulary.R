@@ -39,3 +39,26 @@ i <- 1:10
 outer(i, i, "*")
 #' Close the sink
 sink()
+
+##### Flatten a contingency table ####
+#' When would you want this: You have more than 2 variables
+#' that you want to summarize in a table. table() would
+#' give you a 2X2 table stratified by the 3rd variable.
+#' However ftable() of the table() output will flatten
+#' all the strata and result in a flat contingency table.
+#'
+#' First create some data with more than 3 variables
+breakfast <- rbinom(n = 10, size = 1, prob = 0.3)
+lunch <- rbinom(n = 10, size = 1, prob = 0.9)
+dinner <- rbinom(n = 10, size = 1, prob = 0.6)
+foodpattern <- data.frame(breakfast, lunch, dinner, stringsAsFactors = F)
+foodpattern[foodpattern == 1] <- "Yes"
+foodpattern[foodpattern == 0] <- "No"
+#' retains labels
+xtabs_output <- xtabs(formula = "~ breakfast + lunch + dinner",
+                      data = foodpattern)
+#' does not retain labels
+table_output <- table(foodpattern$breakfast,foodpattern$lunch, foodpattern$dinner)
+#' flatten!
+ftable(xtabs_output)
+ftable(table_output)
