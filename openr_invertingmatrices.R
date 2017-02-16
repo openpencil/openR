@@ -10,6 +10,11 @@
 ## Let's look at how matrix inversion is done.
 ## Create a matrix. We will focus on finding its inverse below.
 matrix_a <- matrix(data = c(2, 3, 4, 5), nrow = 2, ncol = 2)
+## Try this for some insight into inversion:
+## When you have completed a run-through
+## of this script, try changing Line 12 to:
+## matrix_a <- matrix(data = c(2, 3, 4, 6), nrow = 2, ncol = 2)
+## and run the script again. What do you see?
 
 ## And yes, you can always find the inverse using R
 inverted_a_r <- solve(a = matrix_a)
