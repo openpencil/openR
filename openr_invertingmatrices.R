@@ -32,11 +32,13 @@ determinant_a_r <- determinant(x = matrix_a, logarithm = FALSE)
 determinant_a <- (matrix_a[1,1] * matrix_a[2, 2]) - (matrix_a[2, 1] * matrix_a[1, 2])
 
 #### Second, take the adjoint of a matrix: ####
-## If you swap the rows and columns of a matrix and additionally,
-## swap the entries of the leading diagonal, you get the adjoint
-## of the matrix. The adjoint of a matrix has swapped rows and
-## columns and also swapped entries in the leading diagonal.
+## If you swap the entries of the leading diagonal, and
+## additionally swap the signs of the entries in the
+## anti-diagonal you get the adjoint of the matrix.
+##
+# copy matrix_a to a variable called adjoint_a
 adjoint_a <- matrix_a
+# swap the entries in the main diagonal
 diag(adjoint_a) <- rev(diag(matrix_a))
 # swap the sign of the entries in the anti-diagonal
 adjoint_a[1,2] <- -1 * matrix_a[1,2]
