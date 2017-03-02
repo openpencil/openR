@@ -20,7 +20,7 @@ funs <- Filter(is.function, objs)
 # f is the predicate which gives a logical answer of true or false
 # x is the vector from which elements which are "true" are extracted
 # Filter(f, x)
-# gets first os last element that meets the condition in f
+# gets first or last element that meets the condition in f
 # Find(f, x, right = FALSE, nomatch = NULL)
 # applies f to the corresponding elements of the given vectors
 # Map(f, ...)
@@ -33,6 +33,7 @@ out <- (subset(getParseData(parse('~/repos/openR/openr_vocabulary.R')), token ==
 
 # Three parts of a function can be extracted with
 formals()
+# argument
 body()
 environment()
 
@@ -56,6 +57,7 @@ primitive.funs <- Filter(is.primitive, objs)
 j <- function(x) {
   y <- 2
   function() {
+    # even though y is not defined in the function or the function call, it is in the environment.
     c(x, y)
   }
 }
@@ -69,10 +71,10 @@ k()
 #
 # What is this doing?
 f <- function() x + 1
-# Should this be:
+# Ideally this should be:
 l <- function(){x + 1}
 codetools::findGlobals(l)
-# Not sure I understand the function line.
+
 #
 # this is very handy! Empty the environment
 environment(f) <- emptyenv()
@@ -84,6 +86,16 @@ environment(f) <- emptyenv()
 # 4. Dynamic lookup.  Variables are evaluated when needed, and so variables may be defined outside
 # of the function's environment.
 
+#### Every operation in R is a function call ####
+# including
+# ( and )
+# infix operators +
+# control flow operators for if while
+# subsetting operators [ ] and $
+# curly brace {}
+# backtick lets you refer to functions or variables that have otherwise reserved or illegal names
 
 
+# Note the difference between `+` and "+".
+# The first one is the value of the object called +, and the second is a string containing the character +.
 
