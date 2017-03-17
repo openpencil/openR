@@ -1,13 +1,28 @@
 #### Things I did not know from the "Functions" chapter ####
 library(magrittr)
+library(dplyr)
 
+#### THREE MAIN PARTS!!!
+# Three parts of a function can be extracted with
+formals()
+# argument
+body()
+environment()
+
+### namespace!
 # These functions allow you to tell if an object is a function
 is.function()
-is.primitive()
+is.primitive() # Don't have a BODY! oooooooh!
 
 # This code makes a list of all functions in the base package
 objs <- mget(ls("package:base"), inherits = TRUE)
 funs <- Filter(is.function, objs)
+
+objects_in_dplyr <- mget(ls("package:dplyr"), inherits = TRUE)
+funs_in_dplyr <- Filter(is.function, objects_in_dplyr)
+
+# Find all primitive functions
+primitive.funs <- Filter(is.primitive, objs)
 
 # tangential discoveries
 # Reduce uses a binary function to successively combine the elements of a given vector and a possibly given initial value.
@@ -31,11 +46,6 @@ funs <- Filter(is.function, objs)
 # This code makes a list of all functions in any R script
 out <- (subset(getParseData(parse('~/repos/openR/openr_vocabulary.R')), token == "SYMBOL_FUNCTION_CALL")["text"] %>% unique)$text %>% sort
 
-# Three parts of a function can be extracted with
-formals()
-# argument
-body()
-environment()
 
 # Which base function has the most arguments:
 which.max(lapply(funs, function(x) length(formals(x))))
@@ -44,8 +54,6 @@ which.max(lapply(funs, function(x) length(formals(x))))
 length(which(unlist(lapply(funs, function(x) length(formals(x)))) < 1))
 # 225 Functions
 
-# Find all primitive functions
-primitive.funs <- Filter(is.primitive, objs)
 
 #### Lexical Scoping ####
 # R has two types of scoping: lexical scoping, implemented automatically at the language level,
@@ -99,3 +107,51 @@ environment(f) <- emptyenv()
 # Note the difference between `+` and "+".
 # The first one is the value of the object called +, and the second is a string containing the character +.
 
+## Nifty useful stuff ##
+x <- list(1:3, 4:9, 10:12)
+# Use the fact that `[` is a function to subset and get the second element from every set above
+sapply(x, "[", 2)
+
+## The ... argument
+## If a function uses ... , you can only specify arguments listed after ... with their full name.
+
+## A list of function arguments can be supplied to a function using do.call()
+list_of_args <- list(1:10, na.rm = TRUE)
+# supply to the function, mean()
+do.call(mean, list_of_args)
+
+## The default value of an argument can be defined in terms of other arguments.
+
+## You can determine if an argument was supplied or not with the missing() function.
+
+## How to add a non-trivial default value as an argument to a function
+# non-trivial default values might take several lines of code to compute.
+# Instead of inserting that code in the function definition, you could use
+# missing() to conditionally compute it if needed. However, this makes it
+# hard to know which arguments are required and which are optional without
+# carefully reading the documentation.
+#
+# An alternative is to set the default value to NULL and use is.null()
+# to check if the argument was supplied and then make the computations
+# to generate the default value conditional on the is.null() call.
+#
+#
+
+## If you want to ensure that an argument is evaluated you can use force():
+f <- function(x) {
+  10
+}
+f()
+f <- function(x) {
+  force(x)
+  10
+}
+f()
+# Error in force(x) : argument "x" is missing, with no default
+
+add <- function(x) {
+  function(y) x + y
+}
+adders <- lapply(1:10, add)
+adders[[1]](10)
+adders[[10]](10)
