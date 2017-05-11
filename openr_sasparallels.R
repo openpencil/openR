@@ -6,11 +6,10 @@
 #######################################################
 #
 #### Set work directory ####
-## This is ideally a path which you don't want to specify over and over in code.
-## It is also the directory where any output files would end up by default.
+## Ideally a path which you don't want to specify over and over in code.
+## Also the directory where any output files would end up by default.
 ##
-## SAS
-## LIBNAME libref "~/Documents/dtn/";
+## LIBNAME LIBREF "~/Documents/dtn/";
 ##
 ## setwd(): A function that sets the working directory.
 ## dir is named argument whose value you need to supply
@@ -18,7 +17,7 @@
 setwd(dir = "~/Documents/dtn/")
 
 #### Loading in a CSV ####
-## SAS: The DATA step
+##
 ## DATA somedata;
 ##  INFILE 'trials_meta.csv' delimiter=",";
 ## RUN;
@@ -44,7 +43,7 @@ somedata <- read.csv(file = "trials_meta.csv", header = TRUE, as.is = TRUE,
                      strip.white = TRUE, blank.lines.skip = TRUE, check.names = FALSE)
 
 #### Displaying and exploring data ####
-## PROC PRINT data=somedata;
+## PROC PRINT DATA=somedata;
 ##  VAR LATITUDE LONGITUDE CROP;
 ## RUN;
 ##
@@ -90,4 +89,57 @@ somedata$newvar <- unlist(lapply(1:nrow(somedata), function(rownum){
 }))
 
 #### Generating and displaying summaries ####
-## http://stats.idre.ucla.edu/sas/modules/collapsing-across-observations-in-sas/
+##
+## Calculate mean latitude by crop, and output this in a file.
+## PROC MEANS DATA=somedata NWAY;
+##  CLASS CROP;
+##  VAR LATITUDE;
+##  OUTPUT OUT=by_crop_summary MEAN= ;
+## RUN;
+##
+by_crop_summary <- sapply(unique(somedata$CROP), function(cropname){
+  # get the values
+  values <- somedata[somedata$CROP == cropname, "LATITUDE"]
+  summary_values <- data.frame(N = length(values), Mean = mean(values), SD = sd(values),
+                               Minimum = min(values), Maximum = max(values))
+  return(summary_values)
+})
+## Save output in a CSV
+write.csv(x = by_crop_summary, file = "by_crop_summary.csv", row.names = FALSE)
+# NB: To get to exactly the way SAS would present this, you could potentially use
+# the ldply() function on the output of an lapply. In this case, you would need
+# the plyr library.
+# install.packages("plyr", repos = "https://cloud.r-project.org/", dependencies=TRUE)
+# library(plyr)
+
+## Getting means of more than one variable
+## PROC MEANS DATA=somedata NWAY;
+##  CLASS CROP;
+##  VAR LATITUDE, LONGITUDE;
+##  OUTPUT OUT=by_crop_summary MEAN= ;
+## RUN;
+##
+## If you need an operation more than once, generalize and make a function with input arguments!
+## Converting the one-off code above to a function.
+##
+## Here we will feed a string with names of the variables of interest to the function and get back all their summaries
+## e.g.
+variable_names <- c("LATITUDE", "LONGITUDE")
+get_by_crop_summary <- function(var_name){
+  list_of_summaries <- lapply(unique(somedata$CROP), function(cropname){
+    # get the values
+    values <- somedata[somedata$CROP == cropname, var_name]
+    summary_values <- data.frame(N = length(values), Mean = mean(values), SD = sd(values),
+                                 Minimum = min(values), Maximum = max(values))
+    return(summary_values)
+  })
+  names(list_of_summaries) <- unique(somedata$CROP)
+  output <- ldply(list_of_summaries, .id = "Crop")
+  return(output)
+}
+
+summaries_for_two_vars <- lapply(variable_names, function(vname){
+  get_by_crop_summary(var_name = vname)
+})
+names(summaries_for_two_vars) <- variable_names
+final_summary <- ldply(summaries_for_two_vars, .id = "Variable")
