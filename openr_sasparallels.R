@@ -40,7 +40,8 @@ somedata <- read.csv(file = "trials_meta.csv", header = TRUE, as.is = TRUE)
 ## "A.column.name"
 ## check.names = FALSE prevents this aggressive check-and-"correct" behaviour.
 somedata <- read.csv(file = "trials_meta.csv", header = TRUE, as.is = TRUE,
-                     strip.white = TRUE, blank.lines.skip = TRUE, check.names = FALSE)
+                     strip.white = TRUE, blank.lines.skip = TRUE,
+                     check.names = FALSE)
 
 #### Displaying and exploring data ####
 ## PROC PRINT DATA=somedata;
@@ -84,8 +85,16 @@ rownames(somedata)
 ## To make it a row-by-row operation, you can apply the min() function row-by-row with
 ## lapply() which will iterate till reaches the end of the 1:nrow(somedata)
 somedata$newvar <- unlist(lapply(1:nrow(somedata), function(rownum){
+  # rownum <- 1
   minvalue <- min(somedata[rownum, c("LATITUDE", "LONGITUDE")])
   return(minvalue)
+}))
+
+somedata$devlat <- unlist(lapply(1:nrow(somedata), function(rownum){
+  # rownum <- 1
+  meanlat <- mean(somedata[, "LATITUDE"])
+  devlat <- somedata[rownum, "LATITUDE"] - meanlat
+  return(devlat)
 }))
 
 #### Generating and displaying summaries ####
@@ -99,13 +108,32 @@ somedata$newvar <- unlist(lapply(1:nrow(somedata), function(rownum){
 ##
 by_crop_summary <- sapply(unique(somedata$CROP), function(cropname){
   # get the values
+  # cropname <- "Sorghum"
   values <- somedata[somedata$CROP == cropname, "LATITUDE"]
-  summary_values <- data.frame(N = length(values), Mean = mean(values), SD = sd(values),
+  summary_values <- data.frame(N = length(values), Mean = mean(values),
+                               SD = sd(values),
                                Minimum = min(values), Maximum = max(values))
   return(summary_values)
 })
+
+by_crop_summary_list <- lapply(unique(somedata$CROP), function(cropname){
+  # get the values
+  # cropname <- "Sorghum"
+  values <- somedata[somedata$CROP == cropname, "LATITUDE"]
+  summary_values <- data.frame(N = length(values), Mean = mean(values),
+                               SD = sd(values),
+                               Minimum = min(values), Maximum = max(values))
+  return(summary_values)
+})
+names(by_crop_summary_list) <- unique(somedata$CROP)
+library(plyr)
+by_crop_summary_list <- ldply(by_crop_summary_list, .id = "Crops")
+
+
 ## Save output in a CSV
-write.csv(x = by_crop_summary, file = "by_crop_summary.csv", row.names = FALSE)
+write.csv(x = by_crop_summary_list,
+          file = "by_crop_summary_NEW.csv",
+          row.names = FALSE)
 # NB: To get to exactly the way SAS would present this, you could potentially use
 # the ldply() function on the output of an lapply. In this case, you would need
 # the plyr library.
@@ -125,6 +153,8 @@ write.csv(x = by_crop_summary, file = "by_crop_summary.csv", row.names = FALSE)
 ## Here we will feed a string with names of the variables of interest to the function and get back all their summaries
 ## e.g.
 variable_names <- c("LATITUDE", "LONGITUDE")
+
+
 get_by_crop_summary <- function(var_name){
   list_of_summaries <- lapply(unique(somedata$CROP), function(cropname){
     # get the values
